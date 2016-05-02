@@ -19,7 +19,7 @@ namespace LocalPrintScreen
         private static Socket server;
         private static IPEndPoint clientIPEndPoint;
         private static Socket client;
-        private int receiveDataLength;
+        private static int receiveDataLength;
 
         public UdpDataClient(int serverPort,int clientPort,IPAddress serverIP)
         {
@@ -79,17 +79,20 @@ namespace LocalPrintScreen
         }
 
         
-        public byte[] Receive()
+        public static Task<byte[]> Receive()
         {
             try
             {
+
                 byte[] data = new byte[65001];
-                EndPoint Remote = (EndPoint)clientIPEndPoint;
-                receiveDataLength = client.ReceiveFrom(data, ref Remote);/*
-                byte[] realData = new byte[receiveDataLength];
-                Array.Copy(data, realData, receiveDataLength);
-                return realData;*/
-                return data;
+                return Task.Run(() =>
+                {
+                    EndPoint Remote = (EndPoint)clientIPEndPoint;
+                    receiveDataLength = client.ReceiveFrom(data, ref Remote);
+                    byte[] realData = new byte[receiveDataLength];
+                    Array.Copy(data, realData, receiveDataLength);
+                    return realData;
+                });
             }
             catch(Exception e)
             {
