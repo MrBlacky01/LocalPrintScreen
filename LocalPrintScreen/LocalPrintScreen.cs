@@ -30,7 +30,8 @@ namespace LocalPrintScreen
         static int x, y;
         public static IPAddress serverIP;
         private static UdpDataClient server;
- 
+        private static TextBox tempTextBox;
+
         public LocalPrintScreen()
         {
             InitializeComponent();
@@ -41,7 +42,7 @@ namespace LocalPrintScreen
             //imageForPictureBox = Graphics.FromImage(pictureBoxForReceiving.Image);
             x = pictureBoxForReceiving.Width;
             y = pictureBoxForReceiving.Height;
-
+            tempTextBox = textBox2;
             //buttonFinishTranslation.Click += buttonFinishTranslation_Click();
             //tRec = new Thread(new ThreadStart(buttonFinishTranslation_Click));
             //tRec.Start();
@@ -183,6 +184,7 @@ namespace LocalPrintScreen
                     i++;
                     server.SendTo(temp,temp.Length,SocketFlags.None,ipEndPoint);
                     
+                    
                 }
             }
             catch(Exception e)
@@ -201,9 +203,23 @@ namespace LocalPrintScreen
             {
                 server = new UdpDataClient(serverPort, clientPort, serverIP);
                 server.Send(messageForConnect);
+                ReceiveDataAsync();
        
             }
             //Send(messageForConnect);  
+        }
+
+        private async void ReceiveDataAsync()
+        {
+            byte[] data = new byte[65010];
+            while(true)
+            {
+                data = await UdpDataClient.Receive();
+                if (data != null)
+                {
+                    tempTextBox.AppendText(data.Length.ToString()+" " +data[0].ToString()+"\r\n");
+                }
+            }
         }
 
         private void buttonFinishTranslation_Click(object sender, EventArgs e)
