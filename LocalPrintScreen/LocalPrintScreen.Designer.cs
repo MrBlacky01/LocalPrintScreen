@@ -31,7 +31,7 @@
             this.pictureBoxForReceiving = new System.Windows.Forms.PictureBox();
             this.buttonStartTranslation = new System.Windows.Forms.Button();
             this.buttonFinishTranslation = new System.Windows.Forms.Button();
-            this.textBoxserverIP = new System.Windows.Forms.TextBox();
+            this.textBoxServerIP = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
             this.buttonConnectToServer = new System.Windows.Forms.Button();
             this.numericUpDown1 = new System.Windows.Forms.NumericUpDown();
@@ -70,12 +70,12 @@
             this.buttonFinishTranslation.UseVisualStyleBackColor = true;
             this.buttonFinishTranslation.Click += new System.EventHandler(this.buttonFinishTranslation_Click);
             // 
-            // textBoxserverIP
+            // textBoxServerIP
             // 
-            this.textBoxserverIP.Location = new System.Drawing.Point(734, 50);
-            this.textBoxserverIP.Name = "textBoxserverIP";
-            this.textBoxserverIP.Size = new System.Drawing.Size(145, 20);
-            this.textBoxserverIP.TabIndex = 3;
+            this.textBoxServerIP.Location = new System.Drawing.Point(734, 50);
+            this.textBoxServerIP.Name = "textBoxServerIP";
+            this.textBoxServerIP.Size = new System.Drawing.Size(145, 20);
+            this.textBoxServerIP.TabIndex = 3;
             // 
             // label1
             // 
@@ -143,7 +143,7 @@
             this.Controls.Add(this.numericUpDown1);
             this.Controls.Add(this.buttonConnectToServer);
             this.Controls.Add(this.label1);
-            this.Controls.Add(this.textBoxserverIP);
+            this.Controls.Add(this.textBoxServerIP);
             this.Controls.Add(this.buttonFinishTranslation);
             this.Controls.Add(this.buttonStartTranslation);
             this.Controls.Add(this.pictureBoxForReceiving);
@@ -162,7 +162,7 @@
         private System.Windows.Forms.PictureBox pictureBoxForReceiving;
         private System.Windows.Forms.Button buttonStartTranslation;
         private System.Windows.Forms.Button buttonFinishTranslation;
-        private System.Windows.Forms.TextBox textBoxserverIP;
+        private System.Windows.Forms.TextBox textBoxServerIP;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Button buttonConnectToServer;
         private System.Windows.Forms.NumericUpDown numericUpDown1;
