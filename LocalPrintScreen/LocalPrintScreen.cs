@@ -21,6 +21,7 @@ namespace LocalPrintScreen
         public static Stopwatch timer = new Stopwatch();
         Thread tRec;
         Thread tForSendData;
+        static Task tForPaintingCursor;
         Task tForReceiving;
         private static bool  endOfTranslation = false;
         static int i;
@@ -31,6 +32,8 @@ namespace LocalPrintScreen
         public static IPAddress serverIP;
         private static UdpDataClient server;
         private static TextBox tempTextBox;
+        private static List<byte[]> ListOfDgrams = new List<byte[]>();
+        private static Image Cursor;
 
         public LocalPrintScreen()
         {
@@ -41,7 +44,8 @@ namespace LocalPrintScreen
             imageForPictureBox = pictureBoxForReceiving.CreateGraphics();
             PictureBoxWidth = pictureBoxForReceiving.Width;   //x
             PictureBoxHeignt = pictureBoxForReceiving.Height; //y   
-               
+            Cursor = Image.FromFile("cursor-16 (1).png");
+            
             tempTextBox = textBox2;
             textBoxServerIP.Text = "127.0.0.1";
         
@@ -119,7 +123,7 @@ namespace LocalPrintScreen
             // objects. In this case, there is only one
             // EncoderParameter object in the array.
             EncoderParameters myEncoderParameters = new EncoderParameters(1);
-            long a = 12;
+            long a = 50;
             EncoderParameter myEncoderParameter = new EncoderParameter(myEncoder, a);
             myEncoderParameters.Param[0] = myEncoderParameter;
             MemoryStream b = new MemoryStream();
@@ -189,13 +193,54 @@ namespace LocalPrintScreen
 
         private static void MakeScreen(byte[] data)
         {
-            byte[] realData = new byte[data.Length-3];
-            Array.Copy(data, 3, realData, 0,realData.Length);
-            Image screen = ByteArrayToImage(realData);
-            imageForPictureBox.DrawImage(screen, 0, 0, PictureBoxWidth, PictureBoxHeignt);
-            imageForPictureBox.DrawEllipse(new Pen(Color.Yellow, 3), PictureBoxWidth * data[1] / 100, PictureBoxHeignt * data[2] / 100, 20, 20);
+            try
+            {
+                ListOfDgrams.Add(data);
+                if (data[0] == 255)
+                {
+                    
+                    byte[] realData = new byte[LengthOfArraysInList(ListOfDgrams)];
+                    int countOfData = 0;
+                    Array.Copy(ListOfDgrams[0], 3, realData, 0, ListOfDgrams[0].Length - 3);
+                    countOfData += ListOfDgrams[0].Length - 3;
+                    for (int i = 1; i < ListOfDgrams.Count();i++)
+                    {
+                        Array.Copy(ListOfDgrams[i], 1, realData, countOfData, ListOfDgrams[i].Length - 1);
+                        countOfData += ListOfDgrams[i].Length - 1; 
+                    }
+                
+                    Image screen = ByteArrayToImage(realData);
+                    imageForPictureBox.DrawImage(screen, 0, 0, PictureBoxWidth, PictureBoxHeignt);
+                    // imageForPictureBox.DrawEllipse(new Pen(Color.Yellow, 3), PictureBoxWidth * ListOfDgrams[0][1] / 100, PictureBoxHeignt * ListOfDgrams[0][2] / 100, 20, 20);
+                    Point a = new Point(PictureBoxWidth * ListOfDgrams[0][1] / 100, PictureBoxHeignt * ListOfDgrams[0][2] / 100);
+                    tForPaintingCursor =  new Task(() => PaintCursor(a));
+                    tForPaintingCursor.Start();
+                    //imageForPictureBox.DrawImage(Cursor, PictureBoxWidth * ListOfDgrams[0][1] / 100, PictureBoxHeignt * ListOfDgrams[0][2] / 100, 16, 16);
+                    ListOfDgrams.Clear();
+                }
+               
+            }
+            catch(Exception e)
+            {
+                MessageBox.Show(e.Message);
+            }
         }
 
+        private static void PaintCursor(Point e)
+        {
+            imageForPictureBox.DrawImage(Cursor, e.X, e.Y, 16, 16);
+        }
+
+
+        private static int LengthOfArraysInList(List<byte[]> list)
+        {
+            int result = 0;
+            foreach(byte[] array in list)
+            {
+                result += array.Length - 1;
+            }
+            return result - 2;
+        }
         private void buttonFinishTranslation_Click(object sender, EventArgs e)
         {
             endOfTranslation = true;

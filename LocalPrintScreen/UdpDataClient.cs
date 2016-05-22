@@ -56,6 +56,7 @@ namespace LocalPrintScreen
                     if ((message.Length - countOfBytes) > 65001)
                     {
                         temp = new byte[65000];
+                        temp[0] = (byte)(i + 1);
                     }
                     else
                     {
@@ -67,10 +68,8 @@ namespace LocalPrintScreen
                         {
                             temp = new byte[message.Length - countOfBytes + 1];
                         }
-                        
-                    }
-
-                    temp[0] = (byte)(i+1);
+                        temp[0] = 255;
+                    }    
                     if (i == 0)
                     {
                         temp[1] = x;
