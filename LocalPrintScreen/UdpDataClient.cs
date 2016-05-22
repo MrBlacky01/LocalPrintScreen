@@ -43,7 +43,7 @@ namespace LocalPrintScreen
             client.Bind(clientIPEndPoint);
         }
 
-        public void Send(byte[] message)
+        public void Send(byte[] message,byte x, byte y)
         {
             try
             {
@@ -59,13 +59,30 @@ namespace LocalPrintScreen
                     }
                     else
                     {
-                        temp = new byte[message.Length - countOfBytes + 1];
+                        if (countOfBytes == 0)
+                        {
+                            temp = new byte[message.Length + 3];
+                        }
+                        else
+                        {
+                            temp = new byte[message.Length - countOfBytes + 1];
+                        }
+                        
                     }
 
                     temp[0] = (byte)(i+1);
-                    Array.Copy(message, countOfBytes, temp, 1, temp.Length - 1);
-
-                    countOfBytes += 65000;
+                    if (i == 0)
+                    {
+                        temp[1] = x;
+                        temp[2] = y;
+                        Array.Copy(message, countOfBytes, temp, 3, temp.Length - 3);
+                        countOfBytes += 64997;
+                    }
+                    else
+                    {
+                        Array.Copy(message, countOfBytes, temp, 1, temp.Length - 1);
+                        countOfBytes += 64999;
+                    }
                     i++;
                     server.SendTo(temp, temp.Length, SocketFlags.None, serverIPEndPoint);
 

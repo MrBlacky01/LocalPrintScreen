@@ -27,7 +27,7 @@ namespace LocalPrintScreen
         public static int clientPort = 9050;
         public static int serverPort = 11000;
         static Graphics imageForPictureBox;
-        static int x, y;
+        static int PictureBoxHeignt, PictureBoxWidth;
         public static IPAddress serverIP;
         private static UdpDataClient server;
         private static TextBox tempTextBox;
@@ -39,14 +39,12 @@ namespace LocalPrintScreen
             pictureBoxForReceiving.Image = new Bitmap(pictureBoxForReceiving.Width, pictureBoxForReceiving.Height);
             pictureBoxForReceiving.BackColor = Color.White;
             imageForPictureBox = pictureBoxForReceiving.CreateGraphics();
-            //imageForPictureBox = Graphics.FromImage(pictureBoxForReceiving.Image);
-            x = pictureBoxForReceiving.Width;
-            y = pictureBoxForReceiving.Height;
+            PictureBoxWidth = pictureBoxForReceiving.Width;   //x
+            PictureBoxHeignt = pictureBoxForReceiving.Height; //y   
+               
             tempTextBox = textBox2;
             textBoxServerIP.Text = "127.0.0.1";
-            //buttonFinishTranslation.Click += buttonFinishTranslation_Click();
-            //tRec = new Thread(new ThreadStart(buttonFinishTranslation_Click));
-            //tRec.Start();
+        
         }
         
         private void buttonStartTranslation_Click(object sender, EventArgs e)
@@ -74,14 +72,15 @@ namespace LocalPrintScreen
                     
                     byte[] b = VaryQualityLevel(printscreen);
 
-                   // ImageConverter converter = new ImageConverter();
+                    // ImageConverter converter = new ImageConverter();
                     //Image a = BitmapToImage(printscreen);
                     //byte[] b = ((byte[])converter.ConvertTo(printscreen, typeof(byte[])));
                     //MessageBox.Show(b.Count().ToString());
                     //imageForPictureBox.DrawImage(printscreen, 0, 0, x, y);
                     //Send(b);
-                    server.Send(b);
-                    //ReturnedData(printscreen);
+                    byte x = Convert.ToByte(MousePosition.X * 100 / Screen.PrimaryScreen.Bounds.Width) ;
+                    byte y = Convert.ToByte(MousePosition.Y * 100 / Screen.PrimaryScreen.Bounds.Height); ;
+                    server.Send(b,x,y);
                     i++;
                     timer.Restart();
                 }
@@ -120,7 +119,7 @@ namespace LocalPrintScreen
             // objects. In this case, there is only one
             // EncoderParameter object in the array.
             EncoderParameters myEncoderParameters = new EncoderParameters(1);
-            long a = 15;
+            long a = 12;
             EncoderParameter myEncoderParameter = new EncoderParameter(myEncoder, a);
             myEncoderParameters.Param[0] = myEncoderParameter;
             MemoryStream b = new MemoryStream();
@@ -163,7 +162,7 @@ namespace LocalPrintScreen
             if (serverIP != null)
             {
                 server = new UdpDataClient(serverPort, clientPort, serverIP);
-                server.Send(messageForConnect);
+                server.Send(messageForConnect,0,0);
                 ReceiveDataAsync();
                 
        
@@ -190,10 +189,11 @@ namespace LocalPrintScreen
 
         private static void MakeScreen(byte[] data)
         {
-            byte[] realData = new byte[data.Length-1];
-            Array.Copy(data, 1, realData, 0,realData.Length);
+            byte[] realData = new byte[data.Length-3];
+            Array.Copy(data, 3, realData, 0,realData.Length);
             Image screen = ByteArrayToImage(realData);
-            imageForPictureBox.DrawImage(screen, 0, 0, x, y);
+            imageForPictureBox.DrawImage(screen, 0, 0, PictureBoxWidth, PictureBoxHeignt);
+            imageForPictureBox.DrawEllipse(new Pen(Color.Yellow, 3), PictureBoxWidth * data[1] / 100, PictureBoxHeignt * data[2] / 100, 20, 20);
         }
 
         private void buttonFinishTranslation_Click(object sender, EventArgs e)
