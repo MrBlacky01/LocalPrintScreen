@@ -43,6 +43,7 @@ namespace LocalPrintScreen
             x = pictureBoxForReceiving.Width;
             y = pictureBoxForReceiving.Height;
             tempTextBox = textBox2;
+            textBoxServerIP.Text = "127.0.0.1";
             //buttonFinishTranslation.Click += buttonFinishTranslation_Click();
             //tRec = new Thread(new ThreadStart(buttonFinishTranslation_Click));
             //tRec.Start();
@@ -122,23 +123,22 @@ namespace LocalPrintScreen
             long a = 15;
             EncoderParameter myEncoderParameter = new EncoderParameter(myEncoder, a);
             myEncoderParameters.Param[0] = myEncoderParameter;
-            Stream b = new MemoryStream();
+            MemoryStream b = new MemoryStream();
 
             //bmp1.Save("TestPhotoQualityFifty" + i.ToString() + ".jpg", jpgEncoder, myEncoderParameters);
 
             bmp1.Save(b, jpgEncoder, myEncoderParameters);
 
             byte[] value = new byte[b.Length];
-            b.Write(value, 0, (int)b.Length);
+            value = b.ToArray();
+    
             return value;
 
         }
 
         private static ImageCodecInfo GetEncoder(ImageFormat format)
         {
-
             ImageCodecInfo[] codecs = ImageCodecInfo.GetImageDecoders();
-
             foreach (ImageCodecInfo codec in codecs)
             {
                 if (codec.FormatID == format.Guid)
@@ -155,48 +155,9 @@ namespace LocalPrintScreen
 
         } 
 
-        public static void Send(byte[] message)
-        {
-
-            IPEndPoint ipEndPoint = new IPEndPoint(serverIP, serverPort);
-            Socket server = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-            try
-            {
-                int countOfBytes = 0;
-                byte i = 0;
-
-                while (countOfBytes < message.Length)
-                {
-                    byte[] temp;
-                    if ((message.Length - countOfBytes) > 60000)
-                    {
-                        temp = new byte[60001];
-                    }
-                    else
-                    {
-                        temp = new byte[message.Length - countOfBytes + 1];
-                    }
-
-                    temp[0] = i;
-                    Array.Copy(message, countOfBytes, temp, 1, temp.Length - 1);
-
-                    countOfBytes += 60000;
-                    i++;
-                    server.SendTo(temp,temp.Length,SocketFlags.None,ipEndPoint);
-                    
-                    
-                }
-            }
-            catch(Exception e)
-            {
-                server.Close();
-                MessageBox.Show(e.Message);
-            }
-        }
-
         private void buttonConnectToServer_Click(object sender, EventArgs e)
         {
-             IPAddress.TryParse(textBoxserverIP.Text,out serverIP);
+             IPAddress.TryParse(textBoxServerIP.Text,out serverIP);
             byte[] messageForConnect = new byte[1];
             messageForConnect[0] = 1;
             if (serverIP != null)
@@ -204,12 +165,12 @@ namespace LocalPrintScreen
                 server = new UdpDataClient(serverPort, clientPort, serverIP);
                 server.Send(messageForConnect);
                 ReceiveDataAsync();
+                
        
-            }
-            //Send(messageForConnect);  
+            } 
         }
 
-        private async void ReceiveDataAsync()
+        private static async void ReceiveDataAsync()
         {
             byte[] data = new byte[65010];
             while(true)
@@ -217,9 +178,22 @@ namespace LocalPrintScreen
                 data = await UdpDataClient.Receive();
                 if (data != null)
                 {
+                    if (data.Length > 20)
+                    {
+                        MakeScreen(data);
+                    }
+                    
                     tempTextBox.AppendText(data.Length.ToString()+" " +data[0].ToString()+"\r\n");
                 }
             }
+        }
+
+        private static void MakeScreen(byte[] data)
+        {
+            byte[] realData = new byte[data.Length-1];
+            Array.Copy(data, 1, realData, 0,realData.Length);
+            Image screen = ByteArrayToImage(realData);
+            imageForPictureBox.DrawImage(screen, 0, 0, x, y);
         }
 
         private void buttonFinishTranslation_Click(object sender, EventArgs e)
