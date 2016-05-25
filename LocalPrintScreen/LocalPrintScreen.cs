@@ -31,6 +31,7 @@ namespace LocalPrintScreen
         static int PictureBoxHeignt, PictureBoxWidth;
         public static IPAddress serverIP;
         private static UdpDataClient server;
+        private static TcpComandClient mainServer;
         private static TextBox tempTextBox;
         private static List<byte[]> ListOfDgrams = new List<byte[]>();
         private static Image Cursor;
@@ -160,8 +161,20 @@ namespace LocalPrintScreen
 
         private void buttonConnectToServer_Click(object sender, EventArgs e)
         {
-             IPAddress.TryParse(textBoxServerIP.Text,out serverIP);
-            byte[] messageForConnect = new byte[1];
+            
+            bool check = IPAddress.TryParse(textBoxServerIP.Text,out serverIP);
+            if ((check == false)&&(textBoxForName.Text == ""))
+            {
+                return;
+            }
+            mainServer = new TcpComandClient(serverPort, serverIP);
+            mainServer.Send("CONNECT: " + textBoxForName.Text);
+            string response = Encoding.UTF8.GetString(mainServer.Receive());
+            if (response != "")
+            {
+                MessageBox.Show(response);
+            }
+            /*byte[] messageForConnect = new byte[1];
             messageForConnect[0] = 1;
             if (serverIP != null)
             {
@@ -170,7 +183,7 @@ namespace LocalPrintScreen
                 ReceiveDataAsync();
                 
        
-            } 
+            } */
         }
 
         private static async void ReceiveDataAsync()
