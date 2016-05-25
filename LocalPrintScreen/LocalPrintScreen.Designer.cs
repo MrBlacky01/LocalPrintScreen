@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(LocalPrintScreen));
             this.pictureBoxForReceiving = new System.Windows.Forms.PictureBox();
             this.buttonStartTranslation = new System.Windows.Forms.Button();
             this.buttonFinishTranslation = new System.Windows.Forms.Button();
@@ -37,6 +38,11 @@
             this.numericUpDown1 = new System.Windows.Forms.NumericUpDown();
             this.numericUpDown2 = new System.Windows.Forms.NumericUpDown();
             this.textBox2 = new System.Windows.Forms.TextBox();
+            this.button1 = new System.Windows.Forms.Button();
+            this.label2 = new System.Windows.Forms.Label();
+            this.textBoxForName = new System.Windows.Forms.TextBox();
+            this.label3 = new System.Windows.Forms.Label();
+            this.button2 = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxForReceiving)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown2)).BeginInit();
@@ -88,7 +94,7 @@
             // 
             // buttonConnectToServer
             // 
-            this.buttonConnectToServer.Location = new System.Drawing.Point(746, 76);
+            this.buttonConnectToServer.Location = new System.Drawing.Point(746, 123);
             this.buttonConnectToServer.Name = "buttonConnectToServer";
             this.buttonConnectToServer.Size = new System.Drawing.Size(119, 37);
             this.buttonConnectToServer.TabIndex = 5;
@@ -98,14 +104,14 @@
             // 
             // numericUpDown1
             // 
-            this.numericUpDown1.Location = new System.Drawing.Point(777, 195);
+            this.numericUpDown1.Location = new System.Drawing.Point(777, 229);
             this.numericUpDown1.Name = "numericUpDown1";
             this.numericUpDown1.Size = new System.Drawing.Size(64, 20);
             this.numericUpDown1.TabIndex = 6;
             // 
             // numericUpDown2
             // 
-            this.numericUpDown2.Location = new System.Drawing.Point(777, 146);
+            this.numericUpDown2.Location = new System.Drawing.Point(777, 203);
             this.numericUpDown2.Maximum = new decimal(new int[] {
             36,
             0,
@@ -127,17 +133,66 @@
             // 
             // textBox2
             // 
-            this.textBox2.Location = new System.Drawing.Point(900, 12);
+            this.textBox2.Location = new System.Drawing.Point(900, 36);
             this.textBox2.Multiline = true;
             this.textBox2.Name = "textBox2";
-            this.textBox2.Size = new System.Drawing.Size(186, 422);
+            this.textBox2.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.textBox2.Size = new System.Drawing.Size(270, 533);
             this.textBox2.TabIndex = 8;
+            // 
+            // button1
+            // 
+            this.button1.Image = ((System.Drawing.Image)(resources.GetObject("button1.Image")));
+            this.button1.Location = new System.Drawing.Point(777, 392);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(54, 43);
+            this.button1.TabIndex = 9;
+            this.button1.UseVisualStyleBackColor = true;
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(734, 77);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(38, 13);
+            this.label2.TabIndex = 10;
+            this.label2.Text = "Name:";
+            // 
+            // textBoxForName
+            // 
+            this.textBoxForName.Location = new System.Drawing.Point(734, 94);
+            this.textBoxForName.Name = "textBoxForName";
+            this.textBoxForName.Size = new System.Drawing.Size(145, 20);
+            this.textBoxForName.TabIndex = 11;
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(900, 12);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(32, 13);
+            this.label3.TabIndex = 12;
+            this.label3.Text = "Chat:";
+            // 
+            // button2
+            // 
+            this.button2.Location = new System.Drawing.Point(746, 463);
+            this.button2.Name = "button2";
+            this.button2.Size = new System.Drawing.Size(95, 37);
+            this.button2.TabIndex = 13;
+            this.button2.Text = "button2";
+            this.button2.UseVisualStyleBackColor = true;
             // 
             // LocalPrintScreen
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1115, 465);
+            this.ClientSize = new System.Drawing.Size(1182, 593);
+            this.Controls.Add(this.button2);
+            this.Controls.Add(this.label3);
+            this.Controls.Add(this.textBoxForName);
+            this.Controls.Add(this.label2);
+            this.Controls.Add(this.button1);
             this.Controls.Add(this.textBox2);
             this.Controls.Add(this.numericUpDown2);
             this.Controls.Add(this.numericUpDown1);
@@ -168,6 +223,11 @@
         private System.Windows.Forms.NumericUpDown numericUpDown1;
         private System.Windows.Forms.NumericUpDown numericUpDown2;
         private System.Windows.Forms.TextBox textBox2;
+        private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.TextBox textBoxForName;
+        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.Button button2;
     }
 }
 
