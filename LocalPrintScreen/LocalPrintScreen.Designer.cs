@@ -35,17 +35,19 @@
             this.textBoxServerIP = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
             this.buttonConnectToServer = new System.Windows.Forms.Button();
-            this.numericUpDown1 = new System.Windows.Forms.NumericUpDown();
-            this.numericUpDown2 = new System.Windows.Forms.NumericUpDown();
+            this.numericUpDownForQuality = new System.Windows.Forms.NumericUpDown();
+            this.numericUpDownForCadrsPerSecond = new System.Windows.Forms.NumericUpDown();
             this.textBox2 = new System.Windows.Forms.TextBox();
             this.button1 = new System.Windows.Forms.Button();
             this.label2 = new System.Windows.Forms.Label();
             this.textBoxForName = new System.Windows.Forms.TextBox();
             this.label3 = new System.Windows.Forms.Label();
-            this.button2 = new System.Windows.Forms.Button();
+            this.buttonSendMessage = new System.Windows.Forms.Button();
+            this.textBoxForMessage = new System.Windows.Forms.TextBox();
+            this.label4 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxForReceiving)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown2)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownForQuality)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownForCadrsPerSecond)).BeginInit();
             this.SuspendLayout();
             // 
             // pictureBoxForReceiving
@@ -102,30 +104,35 @@
             this.buttonConnectToServer.UseVisualStyleBackColor = true;
             this.buttonConnectToServer.Click += new System.EventHandler(this.buttonConnectToServer_Click);
             // 
-            // numericUpDown1
+            // numericUpDownForQuality
             // 
-            this.numericUpDown1.Location = new System.Drawing.Point(777, 229);
-            this.numericUpDown1.Name = "numericUpDown1";
-            this.numericUpDown1.Size = new System.Drawing.Size(64, 20);
-            this.numericUpDown1.TabIndex = 6;
-            // 
-            // numericUpDown2
-            // 
-            this.numericUpDown2.Location = new System.Drawing.Point(777, 203);
-            this.numericUpDown2.Maximum = new decimal(new int[] {
-            36,
+            this.numericUpDownForQuality.Location = new System.Drawing.Point(767, 235);
+            this.numericUpDownForQuality.Name = "numericUpDownForQuality";
+            this.numericUpDownForQuality.Size = new System.Drawing.Size(64, 20);
+            this.numericUpDownForQuality.TabIndex = 6;
+            this.numericUpDownForQuality.Value = new decimal(new int[] {
+            20,
             0,
             0,
             0});
-            this.numericUpDown2.Minimum = new decimal(new int[] {
+            // 
+            // numericUpDownForCadrsPerSecond
+            // 
+            this.numericUpDownForCadrsPerSecond.Location = new System.Drawing.Point(767, 187);
+            this.numericUpDownForCadrsPerSecond.Maximum = new decimal(new int[] {
+            30,
+            0,
+            0,
+            0});
+            this.numericUpDownForCadrsPerSecond.Minimum = new decimal(new int[] {
             10,
             0,
             0,
             0});
-            this.numericUpDown2.Name = "numericUpDown2";
-            this.numericUpDown2.Size = new System.Drawing.Size(64, 20);
-            this.numericUpDown2.TabIndex = 7;
-            this.numericUpDown2.Value = new decimal(new int[] {
+            this.numericUpDownForCadrsPerSecond.Name = "numericUpDownForCadrsPerSecond";
+            this.numericUpDownForCadrsPerSecond.Size = new System.Drawing.Size(64, 20);
+            this.numericUpDownForCadrsPerSecond.TabIndex = 7;
+            this.numericUpDownForCadrsPerSecond.Value = new decimal(new int[] {
             10,
             0,
             0,
@@ -174,28 +181,48 @@
             this.label3.TabIndex = 12;
             this.label3.Text = "Chat:";
             // 
-            // button2
+            // buttonSendMessage
             // 
-            this.button2.Location = new System.Drawing.Point(746, 463);
-            this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(95, 37);
-            this.button2.TabIndex = 13;
-            this.button2.Text = "button2";
-            this.button2.UseVisualStyleBackColor = true;
+            this.buttonSendMessage.Location = new System.Drawing.Point(746, 493);
+            this.buttonSendMessage.Name = "buttonSendMessage";
+            this.buttonSendMessage.Size = new System.Drawing.Size(133, 37);
+            this.buttonSendMessage.TabIndex = 13;
+            this.buttonSendMessage.Text = "Send message";
+            this.buttonSendMessage.UseVisualStyleBackColor = true;
+            this.buttonSendMessage.Click += new System.EventHandler(this.buttonSendMessage_Click);
+            // 
+            // textBoxForMessage
+            // 
+            this.textBoxForMessage.Location = new System.Drawing.Point(22, 469);
+            this.textBoxForMessage.Multiline = true;
+            this.textBoxForMessage.Name = "textBoxForMessage";
+            this.textBoxForMessage.Size = new System.Drawing.Size(689, 100);
+            this.textBoxForMessage.TabIndex = 14;
+            // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point(19, 453);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(53, 13);
+            this.label4.TabIndex = 15;
+            this.label4.Text = "Message:";
             // 
             // LocalPrintScreen
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1182, 593);
-            this.Controls.Add(this.button2);
+            this.Controls.Add(this.label4);
+            this.Controls.Add(this.textBoxForMessage);
+            this.Controls.Add(this.buttonSendMessage);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.textBoxForName);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.button1);
             this.Controls.Add(this.textBox2);
-            this.Controls.Add(this.numericUpDown2);
-            this.Controls.Add(this.numericUpDown1);
+            this.Controls.Add(this.numericUpDownForCadrsPerSecond);
+            this.Controls.Add(this.numericUpDownForQuality);
             this.Controls.Add(this.buttonConnectToServer);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.textBoxServerIP);
@@ -204,9 +231,10 @@
             this.Controls.Add(this.pictureBoxForReceiving);
             this.Name = "LocalPrintScreen";
             this.Text = "ScreenTranslator";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.LocalPrintScreen_FormClosing);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxForReceiving)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown2)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownForQuality)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownForCadrsPerSecond)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -220,14 +248,16 @@
         private System.Windows.Forms.TextBox textBoxServerIP;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Button buttonConnectToServer;
-        private System.Windows.Forms.NumericUpDown numericUpDown1;
-        private System.Windows.Forms.NumericUpDown numericUpDown2;
+        private System.Windows.Forms.NumericUpDown numericUpDownForQuality;
+        private System.Windows.Forms.NumericUpDown numericUpDownForCadrsPerSecond;
         private System.Windows.Forms.TextBox textBox2;
         private System.Windows.Forms.Button button1;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.TextBox textBoxForName;
         private System.Windows.Forms.Label label3;
-        private System.Windows.Forms.Button button2;
+        private System.Windows.Forms.Button buttonSendMessage;
+        private System.Windows.Forms.TextBox textBoxForMessage;
+        private System.Windows.Forms.Label label4;
     }
 }
 
