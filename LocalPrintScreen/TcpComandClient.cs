@@ -22,7 +22,12 @@ namespace LocalPrintScreen
             Connect();
         }
 
-
+        public void Stop()
+        {
+            handler.Disconnect(false);
+            handler.Dispose();
+            handler.Close();
+        }
 
         private void Connect()
         {
@@ -45,15 +50,18 @@ namespace LocalPrintScreen
             }
         }
 
-        public byte[] Receive()
+        public  Task<byte[]> Receive()
         {
             byte[] data = new byte[2000];
             try
             {
-                int countOfBytes = handler.Receive(data);
-                byte[] message = new byte[countOfBytes];
-                Array.Copy(data, message, message.Length);
-                return message;
+                return Task.Run(()=>
+                {
+                    int countOfBytes = handler.Receive(data);
+                    byte[] message = new byte[countOfBytes];
+                    Array.Copy(data, message, message.Length);
+                    return message;
+                });           
             }
             catch(Exception exept)
             {
