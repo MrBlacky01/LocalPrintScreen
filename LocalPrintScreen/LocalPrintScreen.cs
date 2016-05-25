@@ -14,6 +14,7 @@ using System.Windows.Forms;
 using System.Drawing.Imaging;
 using System.IO;
 
+
 namespace LocalPrintScreen
 {
     public partial class LocalPrintScreen : Form
@@ -35,6 +36,10 @@ namespace LocalPrintScreen
         private static TextBox tempTextBox;
         private static List<byte[]> ListOfDgrams = new List<byte[]>();
         private static Image Cursor;
+        private static NumericUpDown CountOfCadrs, QualityOfCadr;
+        private static TextBox textBoxChating;
+        private static string Login;
+
 
         public LocalPrintScreen()
         {
@@ -42,13 +47,17 @@ namespace LocalPrintScreen
 
             pictureBoxForReceiving.Image = new Bitmap(pictureBoxForReceiving.Width, pictureBoxForReceiving.Height);
             pictureBoxForReceiving.BackColor = Color.White;
+            CountOfCadrs = numericUpDownForCadrsPerSecond;
+            QualityOfCadr = numericUpDownForQuality;
             imageForPictureBox = pictureBoxForReceiving.CreateGraphics();
             PictureBoxWidth = pictureBoxForReceiving.Width;   //x
             PictureBoxHeignt = pictureBoxForReceiving.Height; //y   
             Cursor = Image.FromFile("cursor-16 (1).png");
+
             
             tempTextBox = textBox2;
             textBoxServerIP.Text = "127.0.0.1";
+            textBoxForName.Text = "Black Dragon";
         
         }
         
@@ -75,14 +84,8 @@ namespace LocalPrintScreen
                    // printscreen.Save("printscreen" + i.ToString() + ".jpg", System.Drawing.Imaging.ImageFormat.Jpeg);
                     
                     
-                    byte[] b = VaryQualityLevel(printscreen);
+                    byte[] b = WorkWithGrafic.VaryQualityLevel(printscreen,(int)QualityOfCadr.Value);
 
-                    // ImageConverter converter = new ImageConverter();
-                    //Image a = BitmapToImage(printscreen);
-                    //byte[] b = ((byte[])converter.ConvertTo(printscreen, typeof(byte[])));
-                    //MessageBox.Show(b.Count().ToString());
-                    //imageForPictureBox.DrawImage(printscreen, 0, 0, x, y);
-                    //Send(b);
                     byte x = Convert.ToByte(MousePosition.X * 100 / Screen.PrimaryScreen.Bounds.Width) ;
                     byte y = Convert.ToByte(MousePosition.Y * 100 / Screen.PrimaryScreen.Bounds.Height); ;
                     server.Send(b,x,y);
@@ -92,66 +95,7 @@ namespace LocalPrintScreen
             }
         }
 
-        private static Image BitmapToImage(Bitmap map)
-        {
-            Stream imageStream = new MemoryStream();
-            map.Save(imageStream, ImageFormat.Png);
-            return Image.FromStream(imageStream);
-        }
-
-        private static byte[] ImageToByteArray(Image img)
-        {
-            ImageConverter converter = new ImageConverter();
-            return (byte[])converter.ConvertTo(img, typeof(byte[]));
-        } 
-
-        private static Image ByteArrayToImage(byte[] array)
-        {
-            return (Image)((new ImageConverter()).ConvertFrom(array));
-        }
-
-        private static byte[] VaryQualityLevel(Bitmap image)
-        {
-            // Get a bitmap.
-            Bitmap bmp1 = image;
-            ImageCodecInfo jpgEncoder = GetEncoder(ImageFormat.Jpeg);
-            // Create an Encoder object based on the GUID
-            // for the Quality parameter category.
-            System.Drawing.Imaging.Encoder myEncoder = System.Drawing.Imaging.Encoder.Quality;
-  
-            // Create an EncoderParameters object.
-            // An EncoderParameters object has an array of EncoderParameter
-            // objects. In this case, there is only one
-            // EncoderParameter object in the array.
-            EncoderParameters myEncoderParameters = new EncoderParameters(1);
-            long a = 50;
-            EncoderParameter myEncoderParameter = new EncoderParameter(myEncoder, a);
-            myEncoderParameters.Param[0] = myEncoderParameter;
-            MemoryStream b = new MemoryStream();
-
-            //bmp1.Save("TestPhotoQualityFifty" + i.ToString() + ".jpg", jpgEncoder, myEncoderParameters);
-
-            bmp1.Save(b, jpgEncoder, myEncoderParameters);
-
-            byte[] value = new byte[b.Length];
-            value = b.ToArray();
-    
-            return value;
-
-        }
-
-        private static ImageCodecInfo GetEncoder(ImageFormat format)
-        {
-            ImageCodecInfo[] codecs = ImageCodecInfo.GetImageDecoders();
-            foreach (ImageCodecInfo codec in codecs)
-            {
-                if (codec.FormatID == format.Guid)
-                {
-                    return codec;
-                }
-            }
-            return null;
-        }
+       
 
         public static void ReturnedData(Bitmap image)
         {
@@ -167,13 +111,12 @@ namespace LocalPrintScreen
             {
                 return;
             }
+            Login = textBoxForName.Text;
             mainServer = new TcpComandClient(serverPort, serverIP);
             mainServer.Send("CONNECT: " + textBoxForName.Text);
-            string response = Encoding.UTF8.GetString(mainServer.Receive());
-            if (response != "")
-            {
-                MessageBox.Show(response);
-            }
+             ReceiveResponseAsync();
+           
+
             /*byte[] messageForConnect = new byte[1];
             messageForConnect[0] = 1;
             if (serverIP != null)
@@ -185,7 +128,67 @@ namespace LocalPrintScreen
        
             } */
         }
+        private static async void ReceiveResponseAsync()
+        {
+            byte[] data ;
+            try
+            {
+                while(true)
+                {
+                    data = await mainServer.Receive();
+                    if (data != null)
+                    {
+                        string message = Encoding.UTF8.GetString(data);
+                        Task analysis = new Task(() => AnalysisOfResponse(message));
+                        analysis.Start();
+                    }
+                }
+            }
+            catch(Exception exept)
+            {
+                MessageBox.Show(exept.ToString());
+            }
+        }
 
+        private static void AnalysisOfResponse(string message)
+        {
+            int posOfDoubleDot = message.IndexOf(":");
+            string command = message.Substring(0, posOfDoubleDot );
+            switch (command)
+            {
+                case "MESSAGE":
+                    {
+                        string textOfMessage = message.Substring(posOfDoubleDot + 1, message.Length - posOfDoubleDot - 1);
+                        tempTextBox.AppendText(textOfMessage);
+                    }
+                    break;
+                case "START":
+                    {
+
+                    }
+                    break;
+                case "DISCONNECT":
+                    {
+
+                    }
+                    break;
+                case "STOPSOUND":
+                    {
+
+                    }
+                    break;
+                case "RESUMESOUND":
+                    {
+
+                    }
+                    break;
+                case "EXIT":
+                    {
+
+                    }
+                    break;
+            }
+        }
         private static async void ReceiveDataAsync()
         {
             byte[] data = new byte[65010];
@@ -222,13 +225,11 @@ namespace LocalPrintScreen
                         countOfData += ListOfDgrams[i].Length - 1; 
                     }
                 
-                    Image screen = ByteArrayToImage(realData);
+                    Image screen = WorkWithGrafic.ByteArrayToImage(realData);
                     imageForPictureBox.DrawImage(screen, 0, 0, PictureBoxWidth, PictureBoxHeignt);
-                    // imageForPictureBox.DrawEllipse(new Pen(Color.Yellow, 3), PictureBoxWidth * ListOfDgrams[0][1] / 100, PictureBoxHeignt * ListOfDgrams[0][2] / 100, 20, 20);
                     Point a = new Point(PictureBoxWidth * ListOfDgrams[0][1] / 100, PictureBoxHeignt * ListOfDgrams[0][2] / 100);
                     tForPaintingCursor =  new Task(() => PaintCursor(a));
                     tForPaintingCursor.Start();
-                    //imageForPictureBox.DrawImage(Cursor, PictureBoxWidth * ListOfDgrams[0][1] / 100, PictureBoxHeignt * ListOfDgrams[0][2] / 100, 16, 16);
                     ListOfDgrams.Clear();
                 }
                
@@ -254,6 +255,25 @@ namespace LocalPrintScreen
             }
             return result - 2;
         }
+
+        private void LocalPrintScreen_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            mainServer.Send("EXIT:");
+            mainServer.Stop();
+        }
+
+        private void buttonSendMessage_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                mainServer.Send("MESSAGE:"+ Login+": "+ textBoxForMessage.Text);
+            }
+            finally
+            {
+
+            }
+        }
+
         private void buttonFinishTranslation_Click(object sender, EventArgs e)
         {
             endOfTranslation = true;
