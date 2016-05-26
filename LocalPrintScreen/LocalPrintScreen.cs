@@ -1,18 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Net;
-using System.Net.Sockets;
 using System.Threading;
 using System.Diagnostics;
 using System.Windows.Forms;
-using System.Drawing.Imaging;
-using System.IO;
 
 
 namespace LocalPrintScreen
@@ -20,26 +15,35 @@ namespace LocalPrintScreen
     public partial class LocalPrintScreen : Form
     {
         public static Stopwatch timer = new Stopwatch();
+
         Thread tRec;
-        Thread tForSendData;
         static Task tForPaintingCursor;
-        Task tForReceiving;
+
+
         private static bool  endOfTranslation = false;
+        private static string Login;
+
         static int i;
         public static int clientPort = 9050;
         public static int serverPort = 11000;
         public static int serverPortForVideo = 12000;
+        public static int countOfCadrs = 10;
+        public static int qualityOfCadr = 20;
+
         static Graphics imageForPictureBox;
         static int PictureBoxHeignt, PictureBoxWidth;
         public static IPAddress serverIP;
         private static UdpDataClient server;
         private static TcpComandClient mainServer;
-        private static TextBox tempTextBox;
+        
         private static List<byte[]> ListOfDgrams = new List<byte[]>();
-        private static Image Cursor;
+        private static Image Cursorer;
+
         private static NumericUpDown CountOfCadrs, QualityOfCadr;
-        private static TextBox textBoxChating;
-        private static string Login;
+        private static Button buttonConnect, buttonSend, buttonTranslate, buttonFinish;
+        private static TextBox tempTextBox,textBoxServer, textBoxLogin;
+
+        
 
 
         public LocalPrintScreen()
@@ -48,13 +52,26 @@ namespace LocalPrintScreen
 
             pictureBoxForReceiving.Image = new Bitmap(pictureBoxForReceiving.Width, pictureBoxForReceiving.Height);
             pictureBoxForReceiving.BackColor = Color.White;
+
             CountOfCadrs = numericUpDownForCadrsPerSecond;
             QualityOfCadr = numericUpDownForQuality;
+            buttonSend = buttonSendMessage;
+            buttonConnect = buttonConnectToServer;
+            buttonFinish = buttonFinishTranslation;
+            buttonTranslate = buttonStartTranslation;
+
             imageForPictureBox = pictureBoxForReceiving.CreateGraphics();
             PictureBoxWidth = pictureBoxForReceiving.Width;   //x
             PictureBoxHeignt = pictureBoxForReceiving.Height; //y   
-            Cursor = Image.FromFile("cursor-16 (1).png");
+            Cursorer = Image.FromFile("cursor-16 (1).png");
 
+            numericUpDownForCadrsPerSecond.Enabled = false;
+            numericUpDownForQuality.Enabled = false;
+            buttonFinishTranslation.Enabled = false;
+            buttonSendMessage.Enabled = false;
+            buttonStartTranslation.Enabled = false;
+            textBoxServer = textBoxServerIP;
+            textBoxLogin = textBoxForName;
             
             tempTextBox = textBox2;
             textBoxServerIP.Text = "127.0.0.1";
@@ -63,12 +80,24 @@ namespace LocalPrintScreen
         
         }
         
+        private static void MakeConnectVisible()
+        {
+            buttonConnect.Enabled = false;
+            buttonSend.Enabled = true;
+            buttonTranslate.Enabled = true;
+            textBoxLogin.Enabled = false;
+            textBoxServer.Enabled = false;
+          
+        }
+
         private void buttonStartTranslation_Click(object sender, EventArgs e)
         {
             endOfTranslation = false;
             mainServer.Send("START:");
-            server = new UdpDataClient(serverPortForVideo, clientPort, serverIP);
-            server.InitializeSendSocket();
+            buttonFinish.Enabled = true;
+            numericUpDownForCadrsPerSecond.Enabled = true;
+            numericUpDownForQuality.Enabled = true;
+            server = new UdpVideoSender(serverPortForVideo, serverIP);//UdpDataClient(serverPortForVideo, clientPort, serverIP);
             tRec = new Thread(new ThreadStart(MakingScreens));
             tRec.Start();
         }
@@ -78,31 +107,25 @@ namespace LocalPrintScreen
             timer.Start();
             while (endOfTranslation == false)
             {
-                if (timer.ElapsedMilliseconds > 100)
+                if (timer.ElapsedMilliseconds > (1000 / countOfCadrs))
                 {
                     Bitmap printscreen = new Bitmap(Screen.PrimaryScreen.Bounds.Width, Screen.PrimaryScreen.Bounds.Height);
                     Graphics graphics = Graphics.FromImage(printscreen as Image);
                     graphics.CopyFromScreen(0, 0, 0, 0, printscreen.Size);
                    // printscreen.Save("printscreen" + i.ToString() + ".jpg", System.Drawing.Imaging.ImageFormat.Jpeg);
  
-                    byte[] b = WorkWithGrafic.VaryQualityLevel(printscreen,(int)QualityOfCadr.Value);
+                    byte[] b = WorkWithGrafic.VaryQualityLevel(printscreen,qualityOfCadr/2);
 
                     byte x = Convert.ToByte(MousePosition.X * 100 / Screen.PrimaryScreen.Bounds.Width) ;
                     byte y = Convert.ToByte(MousePosition.Y * 100 / Screen.PrimaryScreen.Bounds.Height); ;
-                    server.Send(b,x,y);
+                    (server as UdpVideoSender).Send(b,x,y);
                     i++;
                     timer.Restart();
                 }
             }
         }
 
-       
-
-        public static void ReturnedData(Bitmap image)
-        {
-            //imageForPictureBox.DrawImage(image,0,0,x,y);
-
-        } 
+      
 
         private void buttonConnectToServer_Click(object sender, EventArgs e)
         {
@@ -145,7 +168,12 @@ namespace LocalPrintScreen
             int posOfDoubleDot = message.IndexOf(":");           
             string command = message.Substring(0, posOfDoubleDot);
             switch (command)
-            { 
+            {
+                case "CONNECT":
+                    {
+                        MakeConnectVisible();
+                    }
+                    break;
                 case "MESSAGE":
                     {                       
                         tempTextBox.AppendText(message.Substring(posOfDoubleDot + 1, message.Length - posOfDoubleDot - 1) + "\r\n");
@@ -153,14 +181,15 @@ namespace LocalPrintScreen
                     break;
                 case "START":
                     {
-                        server = new UdpDataClient(serverPortForVideo, clientPort, serverIP);
-                        server.InitializeReceiveSocket();
+                        buttonTranslate.Enabled = false;
+                        server = new UdpVideoReciver(clientPort, serverIP);//UdpDataClient(serverPortForVideo, clientPort, serverIP);
                         ReceiveDataAsync();
                     }
                     break;
                 case "DISCONNECT":
                     {
-
+                        buttonTranslate.Enabled = true;
+                        server.Stop();
                     }
                     break;
                 case "STOPSOUND":
@@ -187,15 +216,13 @@ namespace LocalPrintScreen
             byte[] data = new byte[65010];
             while(true)
             {
-                data = await UdpDataClient.Receive();
+                data = await UdpVideoReciver.Receive();
                 if (data != null)
                 {
                     if (data.Length > 20)
                     {
                         MakeScreen(data);
                     }
-                    
-                   // tempTextBox.AppendText(data.Length.ToString()+" " +data[0].ToString()+"\r\n");
                 }
             }
         }
@@ -233,9 +260,19 @@ namespace LocalPrintScreen
             }
         }
 
+        private void numericUpDownForCadrsPerSecond_ValueChanged(object sender, EventArgs e)
+        {
+            countOfCadrs = (int)numericUpDownForCadrsPerSecond.Value;
+        }
+
+        private void numericUpDownForQuality_ValueChanged(object sender, EventArgs e)
+        {
+            qualityOfCadr = (int)numericUpDownForQuality.Value;
+        }
+
         private static void PaintCursor(Point e)
         {
-            imageForPictureBox.DrawImage(Cursor, e.X, e.Y, 16, 16);
+            imageForPictureBox.DrawImage(Cursorer, e.X, e.Y, 16, 16);
         }
 
 
@@ -279,6 +316,8 @@ namespace LocalPrintScreen
         private void buttonFinishTranslation_Click(object sender, EventArgs e)
         {
             endOfTranslation = true;
+            mainServer.Send("DISCONNECT:");
+            server.Stop();
         }
     }
 }

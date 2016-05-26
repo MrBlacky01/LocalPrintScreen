@@ -115,6 +115,7 @@
             0,
             0,
             0});
+            this.numericUpDownForQuality.ValueChanged += new System.EventHandler(this.numericUpDownForQuality_ValueChanged);
             // 
             // numericUpDownForCadrsPerSecond
             // 
@@ -137,12 +138,15 @@
             0,
             0,
             0});
+            this.numericUpDownForCadrsPerSecond.ValueChanged += new System.EventHandler(this.numericUpDownForCadrsPerSecond_ValueChanged);
             // 
             // textBox2
             // 
+            this.textBox2.BackColor = System.Drawing.SystemColors.Info;
             this.textBox2.Location = new System.Drawing.Point(900, 36);
             this.textBox2.Multiline = true;
             this.textBox2.Name = "textBox2";
+            this.textBox2.ReadOnly = true;
             this.textBox2.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             this.textBox2.Size = new System.Drawing.Size(270, 533);
             this.textBox2.TabIndex = 8;
