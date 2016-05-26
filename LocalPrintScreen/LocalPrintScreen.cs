@@ -28,6 +28,7 @@ namespace LocalPrintScreen
         static int i;
         public static int clientPort = 9050;
         public static int serverPort = 11000;
+        public static int serverPortForVideo = 12000;
         static Graphics imageForPictureBox;
         static int PictureBoxHeignt, PictureBoxWidth;
         public static IPAddress serverIP;
@@ -58,18 +59,19 @@ namespace LocalPrintScreen
             tempTextBox = textBox2;
             textBoxServerIP.Text = "127.0.0.1";
             textBoxForName.Text = "Black Dragon";
+            textBoxForMessage.Text = "qwerty";
         
         }
         
         private void buttonStartTranslation_Click(object sender, EventArgs e)
         {
             endOfTranslation = false;
+            mainServer.Send("START:");
+            server = new UdpDataClient(serverPortForVideo, clientPort, serverIP);
+            server.InitializeSendSocket();
             tRec = new Thread(new ThreadStart(MakingScreens));
             tRec.Start();
         }
-
-     
- 
 
         private static void MakingScreens()
         {
@@ -82,8 +84,7 @@ namespace LocalPrintScreen
                     Graphics graphics = Graphics.FromImage(printscreen as Image);
                     graphics.CopyFromScreen(0, 0, 0, 0, printscreen.Size);
                    // printscreen.Save("printscreen" + i.ToString() + ".jpg", System.Drawing.Imaging.ImageFormat.Jpeg);
-                    
-                    
+ 
                     byte[] b = WorkWithGrafic.VaryQualityLevel(printscreen,(int)QualityOfCadr.Value);
 
                     byte x = Convert.ToByte(MousePosition.X * 100 / Screen.PrimaryScreen.Bounds.Width) ;
@@ -113,21 +114,11 @@ namespace LocalPrintScreen
             }
             Login = textBoxForName.Text;
             mainServer = new TcpComandClient(serverPort, serverIP);
-            mainServer.Send("CONNECT: " + textBoxForName.Text);
-             ReceiveResponseAsync();
-           
+            mainServer.Send("CONNECT:" + textBoxForName.Text);
+            ReceiveResponseAsync();
 
-            /*byte[] messageForConnect = new byte[1];
-            messageForConnect[0] = 1;
-            if (serverIP != null)
-            {
-                server = new UdpDataClient(serverPort, clientPort, serverIP);
-                server.Send(messageForConnect,0,0);
-                ReceiveDataAsync();
-                
-       
-            } */
         }
+
         private static async void ReceiveResponseAsync()
         {
             byte[] data ;
@@ -139,8 +130,7 @@ namespace LocalPrintScreen
                     if (data != null)
                     {
                         string message = Encoding.UTF8.GetString(data);
-                        Task analysis = new Task(() => AnalysisOfResponse(message));
-                        analysis.Start();
+                        AnalysisOfResponse(message);
                     }
                 }
             }
@@ -150,21 +140,22 @@ namespace LocalPrintScreen
             }
         }
 
-        private static void AnalysisOfResponse(string message)
+        private static async void AnalysisOfResponse(string message)
         {
-            int posOfDoubleDot = message.IndexOf(":");
-            string command = message.Substring(0, posOfDoubleDot );
+            int posOfDoubleDot = message.IndexOf(":");           
+            string command = message.Substring(0, posOfDoubleDot);
             switch (command)
-            {
+            { 
                 case "MESSAGE":
-                    {
-                        string textOfMessage = message.Substring(posOfDoubleDot + 1, message.Length - posOfDoubleDot - 1);
-                        tempTextBox.AppendText(textOfMessage);
+                    {                       
+                        tempTextBox.AppendText(message.Substring(posOfDoubleDot + 1, message.Length - posOfDoubleDot - 1) + "\r\n");
                     }
                     break;
                 case "START":
                     {
-
+                        server = new UdpDataClient(serverPortForVideo, clientPort, serverIP);
+                        server.InitializeReceiveSocket();
+                        ReceiveDataAsync();
                     }
                     break;
                 case "DISCONNECT":
@@ -188,7 +179,9 @@ namespace LocalPrintScreen
                     }
                     break;
             }
+            await Task.Delay(1);
         }
+
         private static async void ReceiveDataAsync()
         {
             byte[] data = new byte[65010];
@@ -202,7 +195,7 @@ namespace LocalPrintScreen
                         MakeScreen(data);
                     }
                     
-                    tempTextBox.AppendText(data.Length.ToString()+" " +data[0].ToString()+"\r\n");
+                   // tempTextBox.AppendText(data.Length.ToString()+" " +data[0].ToString()+"\r\n");
                 }
             }
         }
@@ -258,8 +251,16 @@ namespace LocalPrintScreen
 
         private void LocalPrintScreen_FormClosing(object sender, FormClosingEventArgs e)
         {
-            mainServer.Send("EXIT:");
-            mainServer.Stop();
+            if (mainServer != null)
+            {
+                mainServer.Send("EXIT:");
+                mainServer.Stop();
+            }
+            if (server != null)
+            {
+                server.Stop();
+            }
+            
         }
 
         private void buttonSendMessage_Click(object sender, EventArgs e)
@@ -267,6 +268,7 @@ namespace LocalPrintScreen
             try
             {
                 mainServer.Send("MESSAGE:"+ Login+": "+ textBoxForMessage.Text);
+                textBoxForMessage.Clear();
             }
             finally
             {
