@@ -26,17 +26,24 @@ namespace LocalPrintScreen
             _serverPort = serverPort;
             _clientPort = clientPort;
             _serverIP = serverIP;
-            InitializeReceiveSocket();
-            InitializeSendSocket();
+           
         }
 
-        private void InitializeSendSocket()
+        public void InitializeSendSocket()
         {
             serverIPEndPoint = new IPEndPoint(_serverIP, _serverPort);
             server = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
         }
 
-        private void InitializeReceiveSocket()
+        public void Stop()
+        {
+            if (server != null)
+            {
+                server.Close();
+            } 
+        }
+
+        public void InitializeReceiveSocket()
         {
             clientIPEndPoint = new IPEndPoint(IPAddress.Any, _clientPort );
             client = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
